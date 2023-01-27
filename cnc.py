@@ -67,3 +67,16 @@ class MachineClient:
   def coolant_off(self):
     """ Turns spindle coolant off. """
     print("Coolant turned off.")
+
+
+if __name__ == "__main__":
+  try:
+    import sys
+    file = sys.argv[1]
+    with open(file, 'r') as f:
+      for row in f:
+        print(row.strip())
+  except ImportError:
+    print("The Python module 'sys' was not found.")
+  except FileNotFoundError:
+    print("File '{}' was not found.".format(file))
