@@ -70,13 +70,19 @@ class MachineClient:
 
 def main(filename: str) -> None:
     machine = MachineClient()
-    read_file(filename, machine)
+    read_file_to_list(filename, machine)
 
-def read_file(filename: str, machine_name: MachineClient) -> None:
+def read_file_to_list(filename: str, machine_name: MachineClient) -> list:
+  """Reading file to list allows to check and not "execute" an incorrectly formatted or otherwise incorrect file"""
   try:
+    rows_list = []
     with open(filename, 'r') as f:
         for line in f:
-          print(line.strip())
+          stripped_line = line.strip()
+          if len(stripped_line) != 0:
+            rows_list.append(stripped_line)
+    print(rows_list)
+    rows_list
   except FileNotFoundError:
     print("File '{}' was not found.".format(filename))
   except PermissionError:
@@ -84,7 +90,7 @@ def read_file(filename: str, machine_name: MachineClient) -> None:
 
 if __name__ == "__main__":
   try:
-    #Import sys here which allows us to use the program as a library without causing import errors, could have put it to top like a normal person
+    # Import sys here which allows us to use the program as a library without causing import errors, could have put it to top like a normal person
     import sys
     file = sys.argv[1]
     main(file)
