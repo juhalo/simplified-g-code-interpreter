@@ -70,7 +70,14 @@ class MachineClient:
 
 def main(filename: str) -> None:
     machine = MachineClient()
-    read_file_to_list(filename, machine)
+    line_list = read_file_to_list(filename, machine)
+    print(line_list)
+    if len(line_list) > 0:
+      correct_format = check_lines(line_list)
+      if correct_format:
+        line_list = line_list[1:-1]
+      print(correct_format)
+      print(line_list)
 
 def read_file_to_list(filename: str, machine_name: MachineClient) -> list:
   """Reading file to list allows to check and not "execute" an incorrectly formatted or otherwise incorrect file"""
@@ -81,12 +88,29 @@ def read_file_to_list(filename: str, machine_name: MachineClient) -> list:
           stripped_line = line.strip()
           if len(stripped_line) != 0:
             rows_list.append(stripped_line)
-    print(rows_list)
-    rows_list
   except FileNotFoundError:
     print("File '{}' was not found.".format(filename))
   except PermissionError:
     print("The program does not have permission to access the file '{}'.".format(filename))
+  finally:
+    return rows_list
+
+def check_lines(lines: list) -> bool:
+  if not correct_start_or_end(lines[0]) or not correct_start_or_end(lines[-1]):
+    return False
+  lines = lines[1:-1]
+  return True
+
+def correct_start_or_end(line: str) -> bool:
+  """"Allows start and end lines to have a comment after the '%' sign"""
+  if line[0] != "%":
+    return False
+  if len(line) > 1:
+    splitted_line = line.split("(")
+    if ")" in splitted_line[0] or len(splitted_line)>2 or splitted_line[1].count(")") != 1:
+      return False
+  return True
+
 
 if __name__ == "__main__":
   try:
