@@ -68,15 +68,25 @@ class MachineClient:
     """ Turns spindle coolant off. """
     print("Coolant turned off.")
 
+def main(filename: str) -> None:
+    machine = MachineClient()
+    read_file(filename, machine)
+
+def read_file(filename: str, machine_name: MachineClient) -> None:
+  try:
+    with open(filename, 'r') as f:
+        for line in f:
+          print(line.strip())
+  except FileNotFoundError:
+    print("File '{}' was not found.".format(filename))
+  except PermissionError:
+    print("The program does not have permission to access the file '{}'.".format(filename))
 
 if __name__ == "__main__":
   try:
+    #Import sys here which allows us to use the program as a library without causing import errors, could have put it to top like a normal person
     import sys
     file = sys.argv[1]
-    with open(file, 'r') as f:
-      for row in f:
-        print(row.strip())
+    main(file)
   except ImportError:
     print("The Python module 'sys' was not found.")
-  except FileNotFoundError:
-    print("File '{}' was not found.".format(file))
