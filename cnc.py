@@ -75,7 +75,7 @@ def main(filename: str) -> None:
     if len(line_list) > 0:
       correct_format = check_lines(line_list)
       if correct_format:
-        line_list = line_list[1:-1]
+        line_list = line_list[2:-1]
       print(correct_format)
       print(line_list)
 
@@ -98,19 +98,37 @@ def read_file_to_list(filename: str, machine_name: MachineClient) -> list:
 def check_lines(lines: list) -> bool:
   if not correct_start_or_end(lines[0]) or not correct_start_or_end(lines[-1]):
     return False
-  lines = lines[1:-1]
+  if not correct_program_number(lines[1]):
+    return False
   return True
 
 def correct_start_or_end(line: str) -> bool:
   """"Allows start and end lines to have a comment after the '%' sign"""
   if line[0] != "%":
     return False
-  if len(line) > 1:
-    splitted_line = line.split("(")
-    if ")" in splitted_line[0] or len(splitted_line)>2 or splitted_line[1].count(")") != 1:
+  if len(line.strip()) > 1:
+    potential_comment = line[1:].strip()
+    if potential_comment[0] != "(":
+      return False
+    if potential_comment[-1] != ")":
       return False
   return True
 
+def correct_program_number(line: str) -> bool:
+  """"Has to start with a big 'O' followed by four digits and can have a comment"""
+  if line[0] != "O" or len(line) < 5:
+    return False
+  digits_string = "0123456789"
+  for i in range(1, 5):
+    if line[i] not in digits_string:
+      return False
+  if len(line) > 5:
+    potential_comment = line[5:].strip()
+    if potential_comment[0] != "(":
+      return False
+    if potential_comment[-1] != ")":
+      return False
+  return True
 
 if __name__ == "__main__":
   try:
