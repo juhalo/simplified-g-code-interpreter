@@ -81,8 +81,9 @@ def main(filename: str) -> None:
     line_list = remove_comments(line_list)
     if len(line_list) == 0:
         return
-    print(correct_format)
     print(line_list)
+    for line in line_list:
+      execute_line(line, machine)
 
 def read_file_to_list(filename: str, machine_name: MachineClient) -> list[str]:
   """Reading file to list allows to check and not "execute" an incorrectly formatted or otherwise incorrect file"""
@@ -157,11 +158,20 @@ def correct_line(line: str) -> bool:
   elif ")" in line:
     return False
   splitted_line = line.split("/")[0] # We ignore all characters after the "/" sign
-  accepted_chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.- "
+  accepted_chars = "0123456789NGXYZFSTMDEPC.- "
   for char in splitted_line:
     if char not in accepted_chars:
       return False
   return True
+
+def execute_line(line: str, machine: MachineClient) -> None:
+  """"It is assumed that spaces between commands are required, easy to change if needed"""
+  for command in line.split():
+    execute_command(command, machine)
+  print()
+
+def execute_command(command: str, machine: MachineClient) -> None:
+  print(command)
 
 if __name__ == "__main__":
   try:
