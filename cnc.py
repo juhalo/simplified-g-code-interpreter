@@ -1,8 +1,24 @@
 class MachineClient:
+  def __init__(self):
+    """Current implementation does not care about (all of) these initializations currently but might in the future"""
+    self.__move_rapidly: bool = False
+    self.__move_linearly: bool = False
+    self.__feed_rate: float = 0
+    self.__spindle_speed: int = 0
+    self.__coolant_on: bool = False
+    self.__tool: str = ""
+    self.__third_axis: str = ""
 
   def home(self):
     """ Moves machine to home position. """
+    self.__x: float = 0.0 # All are assumed to be zero
+    self.__y: float = 0.0
+    self.__z: float = 0.0
     print("Moving to home.")
+
+  def print_coords(self):
+    """"Prints current coordinates"""
+    print("X={:.3f} Y={:.3f} Z={:.3f} [mm]".format(self.__x, self.__y, self.__z))
 
   def move(self, x, y, z):
     """ Uses linear movement to move spindle to given XYZ
@@ -12,8 +28,49 @@ class MachineClient:
     y (float): Y axis absolute value [mm]
     z (float): Z axis absolute value [mm]
     """
+    self.__x = x
+    self.__y = y
+    self.__z = z
+
     print("Moving to X={:.3f} Y={:.3f} Z={:.3f} [mm].".format(x, y,
     z))
+
+  def move_rapid(self, x, y, z):
+    """Moves machine along both axis defined and finish in one of these which has not completed. If only one axis is defined, currently calls move_'axis'"""
+    if x == None and y == None:
+      self.move_z(z)
+    elif x == None and z == None:
+      self.move_y(y)
+    elif y == None and z == None:
+      self.move_x(x)
+    elif x == None:
+      self.__move_two_rapidly(y, "y", z, "z")
+    elif y == None:
+      self.__move_two_rapidly(x, "x", z, "z")
+    elif z == None:
+      self.__move_two_rapidly(x, "x", y, "y")
+    else:
+      self.__move_two_rapidly(x, "x", y, "y")
+      self.move_z(z)
+
+  def __move_two_rapidly(self, axis_one: float, axis_one_name: str, axis_two: float, axis_two_name: str):
+    converter_dict = {"x": self.__x, "y": self.__y, "z": self.__z}
+    current_axis_one = converter_dict[axis_one_name]
+    current_axis_two = converter_dict[axis_two_name]
+    axis_one_diff = axis_one - current_axis_one
+    axis_two_diff = axis_two - current_axis_two
+    if abs(axis_one_diff) > abs(axis_two_diff):
+      if axis_one_diff < 0:
+        self.move(current_axis_one-axis_two_diff, axis_two, self.__z)
+      else:
+        self.move(current_axis_one+axis_two_diff, axis_two, self.__z)
+    elif abs(axis_one_diff) < abs(axis_two_diff):
+      if axis_two_diff < 0:
+        self.move(axis_one, current_axis_two-axis_one_diff, self.__z)
+      else:
+        self.move(axis_one, current_axis_two+axis_one_diff, self.__z)
+
+
 
   def move_x(self, value):
     """ Move spindle to given X coordinate. Keeps current Y and Z
@@ -21,6 +78,7 @@ class MachineClient:
     Args:
     value (float): Axis absolute value [mm]
     """
+    self.__x = value
     print("Moving X to {:.3f} [mm].".format(value))
 
   def move_y(self, value):
@@ -29,6 +87,7 @@ class MachineClient:
     Args:
     value(float): Axis absolute value [mm]
     """
+    self.__y = value
     print("Moving Y to {:.3f} [mm].".format(value))
 
   def move_z(self, value):
@@ -37,6 +96,7 @@ class MachineClient:
     Args:
     value (float): Axis absolute value [mm]
     """
+    self.__z = value
     print("Moving Z to {:.3f} [mm].".format(value))
 
   def set_feed_rate(self, value):
@@ -44,6 +104,7 @@ class MachineClient:
     Args:
     value (float): Feed rate [mm/s]
     """
+    self.__feed_rate = value
     print("Using feed rate {} [mm/s].".format(value))
 
   def set_spindle_speed(self, value):
@@ -51,6 +112,7 @@ class MachineClient:
     Args:
     value (int): Spindle speed [rpm]
     """
+    self.__spindle_speed = value
     print("Using spindle speed {} [mm/s].".format(value))
 
   def change_tool(self, tool_name):
@@ -58,32 +120,37 @@ class MachineClient:
     Args:
     tool_name (str): Tool name.
     """
+    self.__tool = tool_name
     print("Changing tool '{:s}'.".format(tool_name))
 
   def coolant_on(self):
     """ Turns spindle coolant on. """
+    self.__coolant_on = True
     print("Coolant turned on.")
 
   def coolant_off(self):
     """ Turns spindle coolant off. """
+    self.__coolant_on = False
     print("Coolant turned off.")
 
 def main(filename: str) -> None:
     machine = MachineClient()
-    line_list = read_file_to_list(filename, machine)
-    print(line_list)
-    if len(line_list) == 0:
-      return
-    correct_format = check_start_and_end(line_list)
-    if not correct_format:
-      return
-    line_list = line_list[2:-1]
-    line_list = remove_comments(line_list)
-    if len(line_list) == 0:
-        return
-    print(line_list)
-    for line in line_list:
-      execute_line(line, machine)
+    machine.home() # Assume that at the beginning of the program go to home
+    machine.print_coords()
+    # line_list = read_file_to_list(filename, machine)
+    # print(line_list)
+    # if len(line_list) == 0:
+    #   return
+    # correct_format = check_start_and_end(line_list)
+    # if not correct_format:
+    #   return
+    # line_list = line_list[2:-1]
+    # line_list = remove_comments(line_list)
+    # if len(line_list) == 0:
+    #     return
+    # print(line_list)
+    # for line in line_list:
+    #   execute_line(line, machine)
 
 def read_file_to_list(filename: str, machine_name: MachineClient) -> list[str]:
   """Reading file to list allows to check and not "execute" an incorrectly formatted or otherwise incorrect file"""
@@ -177,7 +244,8 @@ def correct_line(line: str) -> bool:
 
 def execute_line(line: str, machine: MachineClient) -> None:
   for command in line.split():
-    execute_command(command, machine)
+    #execute_command(command, machine)
+    print(command)
   print()
 
 def execute_command(command: str, machine: MachineClient) -> None:
