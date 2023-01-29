@@ -148,7 +148,19 @@ def remove_comments(lines: list[str]) -> list[str]:
     uncommented_lines.append(line)
   return uncommented_lines
 
-def correct_line(line) -> bool:
+def correct_line(line: str) -> bool:
+  if "(" in line:
+    if line[-1] == ")":
+      return True
+    else:
+      return False
+  elif ")" in line:
+    return False
+  splitted_line = line.split("/")[0] # We ignore all characters after the "/" sign
+  accepted_chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.- "
+  for char in splitted_line:
+    if char not in accepted_chars:
+      return False
   return True
 
 if __name__ == "__main__":
