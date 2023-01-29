@@ -72,14 +72,19 @@ def main(filename: str) -> None:
     machine = MachineClient()
     line_list = read_file_to_list(filename, machine)
     print(line_list)
-    if len(line_list) > 0:
-      correct_format = check_lines(line_list)
-      if correct_format:
-        line_list = line_list[2:-1]
-      print(correct_format)
-      print(line_list)
+    if len(line_list) == 0:
+      return
+    correct_format = check_start_and_end(line_list)
+    if not correct_format:
+      return
+    line_list = line_list[2:-1]
+    line_list = remove_comments(line_list)
+    if len(line_list) == 0:
+        return
+    print(correct_format)
+    print(line_list)
 
-def read_file_to_list(filename: str, machine_name: MachineClient) -> list:
+def read_file_to_list(filename: str, machine_name: MachineClient) -> list[str]:
   """Reading file to list allows to check and not "execute" an incorrectly formatted or otherwise incorrect file"""
   try:
     rows_list = []
@@ -95,7 +100,7 @@ def read_file_to_list(filename: str, machine_name: MachineClient) -> list:
   finally:
     return rows_list
 
-def check_lines(lines: list) -> bool:
+def check_start_and_end(lines: list[str]) -> bool:
   if not correct_start_or_end(lines[0]) or not correct_start_or_end(lines[-1]):
     return False
   if not correct_program_number(lines[1]):
@@ -128,6 +133,22 @@ def correct_program_number(line: str) -> bool:
       return False
     if potential_comment[-1] != ")":
       return False
+  return True
+
+def remove_comments(lines: list[str]) -> list[str]:
+  uncommented_lines = []
+  for i in range(len(lines)):
+    line = lines[i]
+    if line[0] == "/" or ( line[0] == "(" and line[-1] == ")" ):
+      continue
+    if not correct_line(line):
+      return []
+    line = line.split("(")[0]
+    line = line.split("/")[0] # Allows for everything after "/" to be skipped even when not in the beginning, this could be commented out
+    uncommented_lines.append(line)
+  return uncommented_lines
+
+def correct_line(line) -> bool:
   return True
 
 if __name__ == "__main__":
