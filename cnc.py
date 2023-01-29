@@ -162,10 +162,20 @@ def correct_line(line: str) -> bool:
   for char in splitted_line:
     if char not in accepted_chars:
       return False
+  commands = splitted_line.split() # It is assumed that spaces between commands are required, easy to change if needed
+  for command in commands:
+    if len(command) == 0:
+      continue
+    char_num = 0
+    command_char = "NGXYZFSTMDEPC"
+    for char in command_char:
+      char_num += command.count(char)
+    if char_num == 0 or char_num > 1 or len(command) == 1:
+      return False
+
   return True
 
 def execute_line(line: str, machine: MachineClient) -> None:
-  """"It is assumed that spaces between commands are required, easy to change if needed"""
   for command in line.split():
     execute_command(command, machine)
   print()
