@@ -62,13 +62,25 @@ class MachineClient:
     if abs(axis_one_diff) > abs(axis_two_diff):
       if axis_one_diff < 0:
         self.move(current_axis_one-axis_two_diff, axis_two, self.__z)
+        move_func_name = "self.move_" + axis_one_name
+        move_func = globals()[move_func_name]
+        move_func(axis_one)
       else:
         self.move(current_axis_one+axis_two_diff, axis_two, self.__z)
+        move_func_name = "self.move_" + axis_one_name
+        move_func = globals()[move_func_name]
+        move_func(axis_one)
     elif abs(axis_one_diff) < abs(axis_two_diff):
       if axis_two_diff < 0:
         self.move(axis_one, current_axis_two-axis_one_diff, self.__z)
+        move_func_name = "self.move_" + axis_two_name
+        move_func = globals()[move_func_name]
+        move_func(axis_two)
       else:
         self.move(axis_one, current_axis_two+axis_one_diff, self.__z)
+        move_func_name = "self.move_" + axis_two_name
+        move_func = globals()[move_func_name]
+        move_func(axis_two)
 
 
 
