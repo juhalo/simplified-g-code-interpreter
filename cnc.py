@@ -6,8 +6,8 @@ class MachineClient:
     self.__feed_rate: float = 0
     self.__spindle_speed: int = 0
     self.__coolant_on: bool = False
+    self.__rot_on: bool = False
     self.__tool: str = ""
-    self.__third_axis: str = ""
 
   def home(self):
     """ Moves machine to home position. """
@@ -159,6 +159,16 @@ class MachineClient:
     self.__spindle_speed = value
     print("Using spindle speed {} [mm/s].".format(value))
 
+  def spindle_rot_on(self):
+    """ Turns spindle rotation on. """
+    self.__rot_on = True
+    print("Coolant turned on.")
+
+  def spindle_rot_off(self):
+    """ Turns spindle rotation off. """
+    self.__rot_on = False
+    print("Coolant turned on.")
+
   def change_tool(self, tool_name):
     """ Change tool with given name.
     Args:
@@ -190,7 +200,7 @@ class MachineClient:
   def execute_line(self, line):
     """ Execute the given line
     Args:
-    line(str): Line of the .gcode file
+    line(str): Uncommented line of the .gcode file
     """
     x_move = None
     y_move = None
@@ -202,6 +212,20 @@ class MachineClient:
         self.set_rapid_movement()
       elif command == "G01" or command == "G1":
         self.set_linear_movement()
+      elif command == "G17":
+        self.plane = "XY"
+      elif command == "G18":
+        self.plane = "ZX"
+      elif command == "G19":
+        self.plane = "YZ"
+      elif command == "G20":
+        self.__use_mm = False
+      elif command == "G21":
+        self.__use_mm = True
+      elif command == "G28":
+        self.home()
+      elif command == "M5" or command == "M05":
+        self.set_spindle_speed(0)
       elif command == "M8" or command == "M08":
         self.coolant_on()
       elif command == "M9" or command == "M09":
