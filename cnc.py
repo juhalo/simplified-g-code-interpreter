@@ -36,7 +36,16 @@ class MachineClient:
     z))
 
   def move_rapid(self, x, y, z):
-    """Moves machine along both axis defined and finish in one of these which has not completed. If only one axis is defined, currently calls move_'axis'"""
+    """Moves machine along both axis defined and finish in
+    one of these which has not completed. If only one axis
+    is defined, currently calls move_'axis'
+    Args:
+    x (float): x axis absolute value [mm], can be None
+    y (float): y axis absolute value [mm], can be None
+    z (float): z axis absolute value [mm], can be None
+    """
+    if x == None and y == None and z == None:
+      return
     if x == None and y == None:
       self.move_z(z)
     elif x == None and z == None:
@@ -81,6 +90,29 @@ class MachineClient:
         move_func_name = "self.move_" + axis_two_name
         move_func = globals()[move_func_name]
         move_func(axis_two)
+  def move_linear(self, x, y, z):
+    """Moves machine linearly to point (x,y,z)
+    Args:
+    x (float): x axis absolute value [mm], can be None
+    y (float): y axis absolute value [mm], can be None
+    z (float): z axis absolute value [mm], can be None
+    """
+    if x == None and y == None and z == None:
+      return
+    if x == None and y == None:
+      self.move_z(z)
+    elif x == None and z == None:
+      self.move_y(y)
+    elif y == None and z == None:
+      self.move_x(x)
+    elif x == None:
+      self.move(self.__x, y, z)
+    elif y == None:
+      self.move(x, self.__y, z)
+    elif z == None:
+      self.move(x, y, self.__z)
+    else:
+      self.move(x, y, z)
 
 
 
@@ -145,6 +177,60 @@ class MachineClient:
     self.__coolant_on = False
     print("Coolant turned off.")
 
+  def set_rapid_movement(self):
+    """Sets the movement to rapid, can remain between lines"""
+    self.__move_rapidly = True
+    self.__move_linearly = False
+
+  def set_linear_movement(self):
+    """"Sets the movement to linear, can remain between lines"""
+    self.__move_linearly = True
+    self.__move_rapidly = False
+
+  def execute_line(self, line):
+    """ Execute the given line
+    Args:
+    line(str): Line of the .gcode file
+    """
+    x_move = None
+    y_move = None
+    z_move = None
+    for command in line.split():
+      if command[0] == "N":
+        continue
+      elif command == "G0" or "G00":
+        self.set_rapid_movement()
+      elif command == "G01" or command == "G1":
+        self.set_linear_movement()
+      elif command == "M8" or command == "M08":
+        self.coolant_on()
+      elif command == "M9" or command == "M09":
+        self.coolant_off()
+      elif command[0] == "S":
+        self.set_spindle_speed(int(command[1:]))
+      elif command[0] == "F":
+        self.set_feed_rate(float(command[1:]))
+      elif command[0] == "X":
+        x_move = float(command[1:])
+      elif command[0] == "Y":
+        y_move = float(command[1:])
+      elif command[0] == "Z":
+        z_move = float(command[1:])
+      elif command[0] == "T":
+        self.change_tool(f"Tool {int(command[1:])}")
+      print(command)
+    if self.__move_rapidly:
+      self.move_rapid(x_move, y_move, z_move)
+    elif self.__move_linearly:
+      self.move_linear(x_move, y_move, z_move)
+    else:
+      print(f"On line '{line}' movement type not defined")
+      return False
+
+
+    print()
+    return True
+
 def main(filename: str) -> None:
     machine = MachineClient()
     machine.home() # Assume that at the beginning of the program go to home
@@ -162,7 +248,9 @@ def main(filename: str) -> None:
     #     return
     # print(line_list)
     # for line in line_list:
-    #   execute_line(line, machine)
+    #   command_success = machine.execute_line(line)
+    #   if not command_success:
+    #     return
 
 def read_file_to_list(filename: str, machine_name: MachineClient) -> list[str]:
   """Reading file to list allows to check and not "execute" an incorrectly formatted or otherwise incorrect file"""
@@ -254,14 +342,9 @@ def correct_line(line: str) -> bool:
 
   return True
 
-def execute_line(line: str, machine: MachineClient) -> None:
-  for command in line.split():
-    #execute_command(command, machine)
-    print(command)
-  print()
 
-def execute_command(command: str, machine: MachineClient) -> None:
-  print(command)
+
+
 
 if __name__ == "__main__":
   try:
