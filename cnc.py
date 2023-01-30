@@ -304,8 +304,8 @@ def main(filename: str) -> None:
     machine = MachineClient()
     machine.home() # Assume that at the beginning of the program go to home
     machine.print_coords()
+    print()
     line_list = read_file_to_list(filename, machine)
-    print(line_list)
     if len(line_list) == 0:
       return
     correct_format = check_start_and_end(line_list)
@@ -315,7 +315,6 @@ def main(filename: str) -> None:
     line_list = remove_comments(line_list)
     if len(line_list) == 0:
         return
-    print(line_list)
     for line in line_list:
       command_success = machine.execute_line(line)
       if not command_success:
