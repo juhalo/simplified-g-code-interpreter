@@ -5,11 +5,13 @@ class MachineClient:
     """Current implementation does not care about (all of) these initializations currently but might in the future"""
     self._rapid_movement: bool = False
     self._linear_movement: bool = False
-    self._feed_rate: float = 0
+    self._feed_rate: float = 0.0
     self._spindle_speed: int = 0
     self._coolant_on: bool = False
     self._rot_on: bool = False
     self._tool: str = ""
+    self._use_mm: bool = None
+    self._plane: str = ""
 
   def home(self):
     """ Moves machine to home position. """
@@ -247,14 +249,14 @@ class MachineClient:
       elif command == "G01" or command == "G1":
         self.set_linear_movement()
       elif command == "G17":
-        self.plane = "XY"
-        print(f"Set plane to {self.plane}")
+        self._plane = "XY"
+        print(f"Set plane to {self._plane}")
       elif command == "G18":
-        self.plane = "ZX"
-        print(f"Set plane to {self.plane}")
+        self._plane = "ZX"
+        print(f"Set plane to {self._plane}")
       elif command == "G19":
-        self.plane = "YZ"
-        print(f"Set plane to {self.plane}")
+        self._plane = "YZ"
+        print(f"Set plane to {self._plane}")
       elif command == "G20":
         self._use_mm = False
         print("Use inches")
@@ -267,6 +269,7 @@ class MachineClient:
         self.spindle_rot_on()
       elif command == "M5" or command == "M05":
         self.spindle_rot_off()
+        self.set_spindle_speed(0)
       elif command == "M8" or command == "M08":
         self.coolant_on()
       elif command == "M9" or command == "M09":
