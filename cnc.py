@@ -385,7 +385,7 @@ def remove_comments(lines: list[str]) -> list[str]:
     if line[0] == "/" or ( line[0] == "(" and line[-1] == ")" ):
       continue
     if not correct_line(line):
-      raise SourceFileFormatError("Problem in a command line")
+      raise SourceFileFormatError(f"Problem in the command line, '{line}'")
     line = line.split("(")[0]
     line = line.split("/")[0] # Allows for everything after "/" to be skipped even when not in the beginning, this could be commented out
     uncommented_lines.append(line)
