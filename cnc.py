@@ -53,16 +53,16 @@ class MachineClient:
     elif y == None and z == None:
       self.move_x(x)
     elif x == None:
-      self.__move_two_rapidly(y, "y", z, "z")
+      self.__move_two_rapidly(y, "y", z, "z", "x")
     elif y == None:
-      self.__move_two_rapidly(x, "x", z, "z")
+      self.__move_two_rapidly(x, "x", z, "z", "y")
     elif z == None:
-      self.__move_two_rapidly(x, "x", y, "y")
+      self.__move_two_rapidly(x, "x", y, "y", "z")
     else:
-      self.__move_two_rapidly(x, "x", y, "y")
+      self.__move_two_rapidly(x, "x", y, "y", "z")
       self.move_z(z)
 
-  def __move_two_rapidly(self, axis_one: float, axis_one_name: str, axis_two: float, axis_two_name: str):
+  def __move_two_rapidly(self, axis_one: float, axis_one_name: str, axis_two: float, axis_two_name: str, axis_three_name: str):
     converter_dict = {"x": self.__x, "y": self.__y, "z": self.__z}
     current_axis_one = converter_dict[axis_one_name]
     current_axis_two = converter_dict[axis_two_name]
@@ -70,26 +70,54 @@ class MachineClient:
     axis_two_diff = axis_two - current_axis_two
     if abs(axis_one_diff) > abs(axis_two_diff):
       if axis_one_diff < 0:
-        self.move(current_axis_one-axis_two_diff, axis_two, self.__z)
-        move_func_name = "self.move_" + axis_one_name
-        move_func = globals()[move_func_name]
+        if axis_three_name == "z":
+          self.move(current_axis_one-abs(axis_two_diff), axis_two, self.__z)
+        elif axis_three_name == "x":
+          self.move(self.__x, current_axis_one-abs(axis_two_diff), axis_two)
+        else:
+          self.move(current_axis_one-abs(axis_two_diff), self.__y, axis_two)
+        move_func_name = "move_" + axis_one_name
+        move_func = getattr(self, move_func_name)
         move_func(axis_one)
       else:
-        self.move(current_axis_one+axis_two_diff, axis_two, self.__z)
-        move_func_name = "self.move_" + axis_one_name
-        move_func = globals()[move_func_name]
+        if axis_three_name == "z":
+          self.move(current_axis_one+abs(axis_two_diff), axis_two, self.__z)
+        elif axis_three_name == "x":
+          self.move(self.__x, current_axis_one+abs(axis_two_diff), axis_two)
+        else:
+          self.move(current_axis_one+abs(axis_two_diff), self.__y, axis_two)
+        move_func_name = "move_" + axis_one_name
+        move_func = getattr(self, move_func_name)
         move_func(axis_one)
     elif abs(axis_one_diff) < abs(axis_two_diff):
       if axis_two_diff < 0:
-        self.move(axis_one, current_axis_two-axis_one_diff, self.__z)
-        move_func_name = "self.move_" + axis_two_name
-        move_func = globals()[move_func_name]
-        move_func(axis_two)
+        if axis_three_name == "z":
+          self.move(axis_one, current_axis_two-abs(axis_one_diff), self.__z)
+        elif axis_three_name == "x":
+          self.move(self.__x, axis_one, current_axis_two-abs(axis_one_diff))
+        else:
+          self.move(axis_one, self.__y, current_axis_two-abs(axis_one_diff))
+        move_func_name = "move_" + axis_two_name
+        move_func = getattr(self, move_func_name)
+        move_func(axis_one)
       else:
-        self.move(axis_one, current_axis_two+axis_one_diff, self.__z)
-        move_func_name = "self.move_" + axis_two_name
-        move_func = globals()[move_func_name]
-        move_func(axis_two)
+        if axis_three_name == "z":
+          self.move(axis_one, current_axis_two+abs(axis_one_diff), self.__z)
+        elif axis_three_name == "x":
+          self.move(self.__x, axis_one, current_axis_two+abs(axis_one_diff))
+        else:
+          self.move(axis_one, self.__y, current_axis_two+abs(axis_one_diff))
+        move_func_name = "move_" + axis_two_name
+        move_func = getattr(self, move_func_name)
+        move_func(axis_one)
+    else:
+      if axis_three_name == "z":
+        self.move(axis_one, axis_two, self.__z)
+      elif axis_three_name == "x":
+        self.move(self.__x, axis_one, axis_two)
+      else:
+        self.move(axis_one, self.__y, axis_two)
+
   def move_linear(self, x, y, z):
     """Moves machine linearly to point (x,y,z)
     Args:
@@ -162,12 +190,12 @@ class MachineClient:
   def spindle_rot_on(self):
     """ Turns spindle rotation on. """
     self.__rot_on = True
-    print("Coolant turned on.")
+    print("Spindle rotation turned on.")
 
   def spindle_rot_off(self):
     """ Turns spindle rotation off. """
     self.__rot_on = False
-    print("Coolant turned on.")
+    print("Spindle rotation turned on.")
 
   def change_tool(self, tool_name):
     """ Change tool with given name.
@@ -189,13 +217,17 @@ class MachineClient:
 
   def set_rapid_movement(self):
     """Sets the movement to rapid, can remain between lines"""
-    self.__move_rapidly = True
-    self.__move_linearly = False
+    if not self.__move_rapidly:
+      self.__move_rapidly = True
+      self.__move_linearly = False
+      print("Change movement to rapid")
 
   def set_linear_movement(self):
     """"Sets the movement to linear, can remain between lines"""
-    self.__move_linearly = True
-    self.__move_rapidly = False
+    if not self.__move_linearly:
+      self.__move_linearly = True
+      self.__move_rapidly = False
+      print("Change movement to linear")
 
   def execute_line(self, line):
     """ Execute the given line
@@ -214,16 +246,25 @@ class MachineClient:
         self.set_linear_movement()
       elif command == "G17":
         self.plane = "XY"
+        print(f"Set plane to {self.plane}")
       elif command == "G18":
         self.plane = "ZX"
+        print(f"Set plane to {self.plane}")
       elif command == "G19":
         self.plane = "YZ"
+        print(f"Set plane to {self.plane}")
       elif command == "G20":
         self.__use_mm = False
+        print("Use inches")
       elif command == "G21":
         self.__use_mm = True
+        print("Use mm")
       elif command == "G28":
         self.home()
+      elif command == "M3" or command == "M03":
+        self.spindle_rot_on()
+      elif command == "M4" or command == "M04":
+        self.spindle_rot_off()
       elif command == "M5" or command == "M05":
         self.set_spindle_speed(0)
       elif command == "M8" or command == "M08":
@@ -242,7 +283,8 @@ class MachineClient:
         z_move = float(command[1:])
       elif command[0] == "T":
         self.change_tool(f"Tool {int(command[1:])}")
-      print(command)
+      else:
+        print(f"Skipped: {command}")
     if self.__move_rapidly:
       self.move_rapid(x_move, y_move, z_move)
     elif self.__move_linearly:
@@ -254,7 +296,7 @@ class MachineClient:
       print(f"On line '{line}' movement type not defined")
       return False
 
-
+    self.print_coords()
     print()
     return True
 
@@ -262,22 +304,22 @@ def main(filename: str) -> None:
     machine = MachineClient()
     machine.home() # Assume that at the beginning of the program go to home
     machine.print_coords()
-    # line_list = read_file_to_list(filename, machine)
-    # print(line_list)
-    # if len(line_list) == 0:
-    #   return
-    # correct_format = check_start_and_end(line_list)
-    # if not correct_format:
-    #   return
-    # line_list = line_list[2:-1]
-    # line_list = remove_comments(line_list)
-    # if len(line_list) == 0:
-    #     return
-    # print(line_list)
-    # for line in line_list:
-    #   command_success = machine.execute_line(line)
-    #   if not command_success:
-    #     return
+    line_list = read_file_to_list(filename, machine)
+    print(line_list)
+    if len(line_list) == 0:
+      return
+    correct_format = check_start_and_end(line_list)
+    if not correct_format:
+      return
+    line_list = line_list[2:-1]
+    line_list = remove_comments(line_list)
+    if len(line_list) == 0:
+        return
+    print(line_list)
+    for line in line_list:
+      command_success = machine.execute_line(line)
+      if not command_success:
+        return
 
 def read_file_to_list(filename: str, machine_name: MachineClient) -> list[str]:
   """Reading file to list allows to check and not "execute" an incorrectly formatted or otherwise incorrect file"""
