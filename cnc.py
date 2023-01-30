@@ -197,8 +197,8 @@ class MachineClient:
     z_move = None
     for command in line.split():
       if command[0] == "N":
-        continue
-      elif command == "G0" or "G00":
+        print(f"Line: {command}")
+      elif command == "G0" or command == "G00":
         self.set_rapid_movement()
       elif command == "G01" or command == "G1":
         self.set_linear_movement()
@@ -222,6 +222,9 @@ class MachineClient:
     if self.__move_rapidly:
       self.move_rapid(x_move, y_move, z_move)
     elif self.__move_linearly:
+      if self.__feed_rate == 0:
+        print(f"Feed Rate is 0, cannot execute movement in (uncommented) line '{line}'")
+        return False
       self.move_linear(x_move, y_move, z_move)
     else:
       print(f"On line '{line}' movement type not defined")
@@ -278,28 +281,38 @@ def check_start_and_end(lines: list[str]) -> bool:
 def correct_start_or_end(line: str) -> bool:
   """"Allows start and end lines to have a comment after the '%' sign"""
   if line[0] != "%":
+    print("Does not start or end with '%'.")
     return False
   if len(line.strip()) > 1:
     potential_comment = line[1:].strip()
     if potential_comment[0] != "(":
+      print("Incorrect characters in first or last line (line '{line}').")
       return False
     if potential_comment[-1] != ")":
+      print("Incorrect characters in first or last line (line '{line}').")
       return False
   return True
 
 def correct_program_number(line: str) -> bool:
   """"Has to start with a big 'O' followed by four digits and can have a comment"""
-  if line[0] != "O" or len(line) < 5:
+  if line[0] != "O":
+    print("Program number does not start with 'O' or incorrect line in place of program number line.")
+    return False
+  if len(line) < 5:
+    print("Program number line too short or incorrect line in place of program number line.")
     return False
   digits_string = "0123456789"
   for i in range(1, 5):
     if line[i] not in digits_string:
+      print("Incorrect character in number part of program number or incorrect line in place of program number line.")
       return False
   if len(line) > 5:
     potential_comment = line[5:].strip()
     if potential_comment[0] != "(":
+      print("Incorrect characters in program number line or incorrect comment.")
       return False
     if potential_comment[-1] != ")":
+      print("Incorrect characters in program number line or incorrect comment.")
       return False
   return True
 
@@ -321,6 +334,7 @@ def correct_line(line: str) -> bool:
     if line[-1] == ")":
       return True
     else:
+      print(f"Comment not closed in line '{line}'.")
       return False
   elif ")" in line:
     return False
@@ -328,6 +342,7 @@ def correct_line(line: str) -> bool:
   accepted_chars = "0123456789NGXYZFSTMDEPC.- "
   for char in splitted_line:
     if char not in accepted_chars:
+      print(f"Invalid character in line '{line}'.")
       return False
   commands = splitted_line.split() # It is assumed that spaces between commands are required, easy to change if needed
   for command in commands:
@@ -337,7 +352,14 @@ def correct_line(line: str) -> bool:
     command_char = "NGXYZFSTMDEPC"
     for char in command_char:
       char_num += command.count(char)
-    if char_num == 0 or char_num > 1 or len(command) == 1:
+    if char_num == 0:
+      print(f"Missing command letter in a command in line '{line}'.")
+      return False
+    if char_num > 1:
+      print(f"Too many command letters in a command in line '{line}'.")
+      return False
+    if len(command) == 1:
+      print(f"Command too short in line '{line}'.")
       return False
 
   return True
