@@ -324,14 +324,13 @@ def read_file_to_list(filename: str) -> list[str]:
           stripped_line = line.strip()
           if len(stripped_line) != 0:
             rows_list.append(stripped_line)
+    return rows_list
   except FileNotFoundError:
     print("File '{}' was not found.".format(filename))
     raise FileNotFoundError
   except PermissionError:
     print("The program does not have permission to access the file '{}'.".format(filename))
     raise PermissionError
-  finally:
-    return rows_list
 
 def check_start_and_end(lines: list[str]):
   if not correct_start_or_end(lines[0]):

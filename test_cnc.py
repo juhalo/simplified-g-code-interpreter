@@ -55,3 +55,8 @@ def test_correct_full_rectangle():
     assert machine._y == correct_values["y"][i]
     assert machine._z == correct_values["z"][i]
     i += 1
+
+
+def test_incorrect_file_name():
+  with pytest.raises(FileNotFoundError):
+    cnc.main("reactangle.gcode")
