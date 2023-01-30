@@ -392,13 +392,13 @@ def remove_comments(lines: list[str]) -> list[str]:
   return uncommented_lines
 
 def correct_line(line: str) -> bool:
-  if "(" in line:
+  if "(" in line and "(" in line.split("/")[0]: # Guarantees that "(" is before "/"
     if line[-1] == ")":
       return True
     else:
       print(f"Comment not closed in line '{line}'.")
       return False
-  elif ")" in line:
+  elif ")" in line and ")" in line.split("/")[0]:
     return False
   splitted_line = line.split("/")[0] # We ignore all characters after the "/" sign
   accepted_chars = "0123456789NGXYZFSTMDEPC.- "
