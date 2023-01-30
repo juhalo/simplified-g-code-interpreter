@@ -41,11 +41,11 @@ Rapid movement has been taken to mean moving first along both of the axis (in th
 - G18 => Set plane to 'zx'
 - G19 => Set plane to 'yz'
 - G20 => Set units to inches (not fully implemented)
-- G21 => Set units to mm
+- G21 => Set units to millimeters
 - G28 => Go to home position (assumed to be (0,0,0))
-- M3 => Turn spindle rotation on (does not implement rotation direction)
-- M5 => Turn spindle rotation off
-- M9 => Turn spindle coolant on
+- M3 OR M03 => Turn spindle rotation on (does not implement rotation direction)
+- M5 OR M05 => Turn spindle rotation off
+- M9 OR M09 => Turn spindle coolant on
 - M10 => Turn spindle coolant off
 - Sxx => Set spindle rotation speed to xx
 - Fxx => Set spindle feed rate to xx
@@ -56,6 +56,7 @@ Rapid movement has been taken to mean moving first along both of the axis (in th
 
 ## To-do
 
-- [ ] Writing Unit tests
+- [ ] Write more unit tests
 - [ ] Fully implementing G20
 - [ ] Implementing other 'G' and 'M' commands
+- [ ] Allow having no spaces between commands
