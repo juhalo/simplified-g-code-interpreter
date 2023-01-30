@@ -1,4 +1,4 @@
-from cnc_exceptions import IncorrectlyFormattedSourceFile
+from cnc_exceptions import SourceFileFormatError
 
 class MachineClient:
   def __init__(self):
@@ -290,11 +290,11 @@ class MachineClient:
     elif self._linear_movement:
       if self._feed_rate == 0:
         print(f"Feed Rate is 0, cannot execute movement in (uncommented) line '{line}'")
-        raise IncorrectlyFormattedSourceFile("Cannot execute movement due to feed rate being 0")
+        raise SourceFileFormatError("Cannot execute movement due to feed rate being 0")
       self.move_linear(x_move, y_move, z_move)
     else:
       print(f"On line '{line}' movement type not defined")
-      raise IncorrectlyFormattedSourceFile("Movement type not defined")
+      raise SourceFileFormatError("Movement type not defined")
 
     self.print_coords()
     print()
@@ -332,11 +332,11 @@ def read_file_to_list(filename: str) -> list[str]:
 
 def check_start_and_end(lines: list[str]):
   if not correct_start_or_end(lines[0]):
-    raise IncorrectlyFormattedSourceFile("Incorrect first line")
+    raise SourceFileFormatError("Incorrect first line")
   if not correct_start_or_end(lines[-1]):
-    raise IncorrectlyFormattedSourceFile("Incorrect final line")
+    raise SourceFileFormatError("Incorrect final line")
   if not correct_program_number(lines[1]):
-    raise IncorrectlyFormattedSourceFile("Incorrect program number line")
+    raise SourceFileFormatError("Incorrect program number line")
 
 def correct_start_or_end(line: str) -> bool:
   """"Allows start and end lines to have a comment after the '%' sign"""
@@ -383,7 +383,7 @@ def remove_comments(lines: list[str]) -> list[str]:
     if line[0] == "/" or ( line[0] == "(" and line[-1] == ")" ):
       continue
     if not correct_line(line):
-      raise IncorrectlyFormattedSourceFile("Problem in a command line")
+      raise SourceFileFormatError("Problem in a command line")
     line = line.split("(")[0]
     line = line.split("/")[0] # Allows for everything after "/" to be skipped even when not in the beginning, this could be commented out
     uncommented_lines.append(line)
