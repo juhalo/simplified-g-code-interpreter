@@ -334,11 +334,11 @@ def read_file_to_list(filename: str) -> list[str]:
 
 def check_start_and_end(lines: list[str]):
   if not correct_start_or_end(lines[0]):
-    raise SourceFileFormatError("Incorrect first line")
+    raise SourceFileFormatError(f"Incorrect first line, '{lines[0]}'")
   if not correct_start_or_end(lines[-1]):
-    raise SourceFileFormatError("Incorrect final line")
+    raise SourceFileFormatError(f"Incorrect final line, '{lines[-1]}'")
   if not correct_program_number(lines[1]):
-    raise SourceFileFormatError("Incorrect program number line")
+    raise SourceFileFormatError(f"Incorrect program number line, '{lines[1]}'")
 
 def correct_start_or_end(line: str) -> bool:
   """"Allows start and end lines to have a comment after the '%' sign"""
@@ -438,3 +438,4 @@ if __name__ == "__main__":
     main(file)
   except ImportError:
     print("The Python module 'sys' was not found.")
+    raise ImportError
