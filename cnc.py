@@ -1,24 +1,26 @@
+from cnc_exceptions import IncorrectlyFormattedSourceFile
+
 class MachineClient:
   def __init__(self):
     """Current implementation does not care about (all of) these initializations currently but might in the future"""
-    self.__move_rapidly: bool = False
-    self.__move_linearly: bool = False
-    self.__feed_rate: float = 0
-    self.__spindle_speed: int = 0
-    self.__coolant_on: bool = False
-    self.__rot_on: bool = False
-    self.__tool: str = ""
+    self._rapid_movement: bool = False
+    self._linear_movement: bool = False
+    self._feed_rate: float = 0
+    self._spindle_speed: int = 0
+    self._coolant_on: bool = False
+    self._rot_on: bool = False
+    self._tool: str = ""
 
   def home(self):
     """ Moves machine to home position. """
-    self.__x: float = 0.0 # All are assumed to be zero
-    self.__y: float = 0.0
-    self.__z: float = 0.0
+    self._x: float = 0.0 # All are assumed to be zero
+    self._y: float = 0.0
+    self._z: float = 0.0
     print("Moving to home.")
 
   def print_coords(self):
     """"Prints current coordinates"""
-    print("X={:.3f} Y={:.3f} Z={:.3f} [mm]".format(self.__x, self.__y, self.__z))
+    print("X={:.3f} Y={:.3f} Z={:.3f} [mm]".format(self._x, self._y, self._z))
 
   def move(self, x, y, z):
     """ Uses linear movement to move spindle to given XYZ
@@ -28,9 +30,9 @@ class MachineClient:
     y (float): Y axis absolute value [mm]
     z (float): Z axis absolute value [mm]
     """
-    self.__x = x
-    self.__y = y
-    self.__z = z
+    self._x = x
+    self._y = y
+    self._z = z
 
     print("Moving to X={:.3f} Y={:.3f} Z={:.3f} [mm].".format(x, y,
     z))
@@ -53,17 +55,17 @@ class MachineClient:
     elif y == None and z == None:
       self.move_x(x)
     elif x == None:
-      self.__move_two_rapidly(y, "y", z, "z", "x")
+      self._move_two_rapidly(y, "y", z, "z", "x")
     elif y == None:
-      self.__move_two_rapidly(x, "x", z, "z", "y")
+      self._move_two_rapidly(x, "x", z, "z", "y")
     elif z == None:
-      self.__move_two_rapidly(x, "x", y, "y", "z")
+      self._move_two_rapidly(x, "x", y, "y", "z")
     else:
-      self.__move_two_rapidly(x, "x", y, "y", "z")
+      self._move_two_rapidly(x, "x", y, "y", "z")
       self.move_z(z)
 
-  def __move_two_rapidly(self, axis_one: float, axis_one_name: str, axis_two: float, axis_two_name: str, axis_three_name: str):
-    converter_dict = {"x": self.__x, "y": self.__y, "z": self.__z}
+  def _move_two_rapidly(self, axis_one: float, axis_one_name: str, axis_two: float, axis_two_name: str, axis_three_name: str):
+    converter_dict = {"x": self._x, "y": self._y, "z": self._z}
     current_axis_one = converter_dict[axis_one_name]
     current_axis_two = converter_dict[axis_two_name]
     axis_one_diff = axis_one - current_axis_one
@@ -71,52 +73,52 @@ class MachineClient:
     if abs(axis_one_diff) > abs(axis_two_diff):
       if axis_one_diff < 0:
         if axis_three_name == "z":
-          self.move(current_axis_one-abs(axis_two_diff), axis_two, self.__z)
+          self.move(current_axis_one-abs(axis_two_diff), axis_two, self._z)
         elif axis_three_name == "x":
-          self.move(self.__x, current_axis_one-abs(axis_two_diff), axis_two)
+          self.move(self._x, current_axis_one-abs(axis_two_diff), axis_two)
         else:
-          self.move(current_axis_one-abs(axis_two_diff), self.__y, axis_two)
+          self.move(current_axis_one-abs(axis_two_diff), self._y, axis_two)
         move_func_name = "move_" + axis_one_name
         move_func = getattr(self, move_func_name)
         move_func(axis_one)
       else:
         if axis_three_name == "z":
-          self.move(current_axis_one+abs(axis_two_diff), axis_two, self.__z)
+          self.move(current_axis_one+abs(axis_two_diff), axis_two, self._z)
         elif axis_three_name == "x":
-          self.move(self.__x, current_axis_one+abs(axis_two_diff), axis_two)
+          self.move(self._x, current_axis_one+abs(axis_two_diff), axis_two)
         else:
-          self.move(current_axis_one+abs(axis_two_diff), self.__y, axis_two)
+          self.move(current_axis_one+abs(axis_two_diff), self._y, axis_two)
         move_func_name = "move_" + axis_one_name
         move_func = getattr(self, move_func_name)
         move_func(axis_one)
     elif abs(axis_one_diff) < abs(axis_two_diff):
       if axis_two_diff < 0:
         if axis_three_name == "z":
-          self.move(axis_one, current_axis_two-abs(axis_one_diff), self.__z)
+          self.move(axis_one, current_axis_two-abs(axis_one_diff), self._z)
         elif axis_three_name == "x":
-          self.move(self.__x, axis_one, current_axis_two-abs(axis_one_diff))
+          self.move(self._x, axis_one, current_axis_two-abs(axis_one_diff))
         else:
-          self.move(axis_one, self.__y, current_axis_two-abs(axis_one_diff))
+          self.move(axis_one, self._y, current_axis_two-abs(axis_one_diff))
         move_func_name = "move_" + axis_two_name
         move_func = getattr(self, move_func_name)
         move_func(axis_one)
       else:
         if axis_three_name == "z":
-          self.move(axis_one, current_axis_two+abs(axis_one_diff), self.__z)
+          self.move(axis_one, current_axis_two+abs(axis_one_diff), self._z)
         elif axis_three_name == "x":
-          self.move(self.__x, axis_one, current_axis_two+abs(axis_one_diff))
+          self.move(self._x, axis_one, current_axis_two+abs(axis_one_diff))
         else:
-          self.move(axis_one, self.__y, current_axis_two+abs(axis_one_diff))
+          self.move(axis_one, self._y, current_axis_two+abs(axis_one_diff))
         move_func_name = "move_" + axis_two_name
         move_func = getattr(self, move_func_name)
         move_func(axis_one)
     else:
       if axis_three_name == "z":
-        self.move(axis_one, axis_two, self.__z)
+        self.move(axis_one, axis_two, self._z)
       elif axis_three_name == "x":
-        self.move(self.__x, axis_one, axis_two)
+        self.move(self._x, axis_one, axis_two)
       else:
-        self.move(axis_one, self.__y, axis_two)
+        self.move(axis_one, self._y, axis_two)
 
   def move_linear(self, x, y, z):
     """Moves machine linearly to point (x,y,z)
@@ -134,11 +136,11 @@ class MachineClient:
     elif y == None and z == None:
       self.move_x(x)
     elif x == None:
-      self.move(self.__x, y, z)
+      self.move(self._x, y, z)
     elif y == None:
-      self.move(x, self.__y, z)
+      self.move(x, self._y, z)
     elif z == None:
-      self.move(x, y, self.__z)
+      self.move(x, y, self._z)
     else:
       self.move(x, y, z)
 
@@ -150,7 +152,7 @@ class MachineClient:
     Args:
     value (float): Axis absolute value [mm]
     """
-    self.__x = value
+    self._x = value
     print("Moving X to {:.3f} [mm].".format(value))
 
   def move_y(self, value):
@@ -159,7 +161,7 @@ class MachineClient:
     Args:
     value(float): Axis absolute value [mm]
     """
-    self.__y = value
+    self._y = value
     print("Moving Y to {:.3f} [mm].".format(value))
 
   def move_z(self, value):
@@ -168,7 +170,7 @@ class MachineClient:
     Args:
     value (float): Axis absolute value [mm]
     """
-    self.__z = value
+    self._z = value
     print("Moving Z to {:.3f} [mm].".format(value))
 
   def set_feed_rate(self, value):
@@ -176,7 +178,7 @@ class MachineClient:
     Args:
     value (float): Feed rate [mm/s]
     """
-    self.__feed_rate = value
+    self._feed_rate = value
     print("Using feed rate {} [mm/s].".format(value))
 
   def set_spindle_speed(self, value):
@@ -184,17 +186,17 @@ class MachineClient:
     Args:
     value (int): Spindle speed [rpm]
     """
-    self.__spindle_speed = value
+    self._spindle_speed = value
     print("Using spindle speed {} [mm/s].".format(value))
 
   def spindle_rot_on(self):
     """ Turns spindle rotation on. """
-    self.__rot_on = True
+    self._rot_on = True
     print("Spindle rotation turned on.")
 
   def spindle_rot_off(self):
     """ Turns spindle rotation off. """
-    self.__rot_on = False
+    self._rot_on = False
     print("Spindle rotation turned on.")
 
   def change_tool(self, tool_name):
@@ -202,31 +204,31 @@ class MachineClient:
     Args:
     tool_name (str): Tool name.
     """
-    self.__tool = tool_name
+    self._tool = tool_name
     print("Changing tool '{:s}'.".format(tool_name))
 
   def coolant_on(self):
     """ Turns spindle coolant on. """
-    self.__coolant_on = True
+    self._coolant_on = True
     print("Coolant turned on.")
 
   def coolant_off(self):
     """ Turns spindle coolant off. """
-    self.__coolant_on = False
+    self._coolant_on = False
     print("Coolant turned off.")
 
   def set_rapid_movement(self):
     """Sets the movement to rapid, can remain between lines"""
-    if not self.__move_rapidly:
-      self.__move_rapidly = True
-      self.__move_linearly = False
+    if not self._rapid_movement:
+      self._rapid_movement = True
+      self._linear_movement = False
       print("Change movement to rapid")
 
   def set_linear_movement(self):
     """"Sets the movement to linear, can remain between lines"""
-    if not self.__move_linearly:
-      self.__move_linearly = True
-      self.__move_rapidly = False
+    if not self._linear_movement:
+      self._linear_movement = True
+      self._rapid_movement = False
       print("Change movement to linear")
 
   def execute_line(self, line):
@@ -254,16 +256,16 @@ class MachineClient:
         self.plane = "YZ"
         print(f"Set plane to {self.plane}")
       elif command == "G20":
-        self.__use_mm = False
+        self._use_mm = False
         print("Use inches")
       elif command == "G21":
-        self.__use_mm = True
+        self._use_mm = True
         print("Use mm")
       elif command == "G28":
         self.home()
       elif command == "M3" or command == "M03":
         self.spindle_rot_on()
-      elif command == "M5" or command == "M04":
+      elif command == "M5" or command == "M05":
         self.spindle_rot_off()
       elif command == "M8" or command == "M08":
         self.coolant_on()
@@ -283,27 +285,28 @@ class MachineClient:
         self.change_tool(f"Tool {int(command[1:])}")
       else:
         print(f"Skipped: {command}")
-    if self.__move_rapidly:
+    if self._rapid_movement:
       self.move_rapid(x_move, y_move, z_move)
-    elif self.__move_linearly:
-      if self.__feed_rate == 0:
+    elif self._linear_movement:
+      if self._feed_rate == 0:
         print(f"Feed Rate is 0, cannot execute movement in (uncommented) line '{line}'")
-        return False
+        raise IncorrectlyFormattedSourceFile("Cannot execute movement due to feed rate being 0")
       self.move_linear(x_move, y_move, z_move)
     else:
       print(f"On line '{line}' movement type not defined")
-      return False
+      raise IncorrectlyFormattedSourceFile("Movement type not defined")
 
     self.print_coords()
     print()
-    return True
+
 
 def main(filename: str) -> None:
     machine = MachineClient()
     machine.home() # Assume that at the beginning of the program go to home
     machine.print_coords()
     print()
-    line_list = read_file_to_list(filename, machine)
+    line_list = read_file_to_list(filename)
+    print(line_list)
     if len(line_list) == 0:
       return
     correct_format = check_start_and_end(line_list)
@@ -314,11 +317,9 @@ def main(filename: str) -> None:
     if len(line_list) == 0:
         return
     for line in line_list:
-      command_success = machine.execute_line(line)
-      if not command_success:
-        return
+      machine.execute_line(line)
 
-def read_file_to_list(filename: str, machine_name: MachineClient) -> list[str]:
+def read_file_to_list(filename: str) -> list[str]:
   """Reading file to list allows to check and not "execute" an incorrectly formatted or otherwise incorrect file"""
   try:
     rows_list = []
