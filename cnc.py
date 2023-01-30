@@ -263,10 +263,8 @@ class MachineClient:
         self.home()
       elif command == "M3" or command == "M03":
         self.spindle_rot_on()
-      elif command == "M4" or command == "M04":
+      elif command == "M5" or command == "M04":
         self.spindle_rot_off()
-      elif command == "M5" or command == "M05":
-        self.set_spindle_speed(0)
       elif command == "M8" or command == "M08":
         self.coolant_on()
       elif command == "M9" or command == "M09":
