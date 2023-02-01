@@ -4,9 +4,12 @@ import cnc
 import pytest
 
 def test_correct_full_rectangle():
-  """"Test execution of correctly loaded in rectangle.gcode file's array representation"""
+  """"Test execution of correctly loading and executing correct rectangle.gcode file"""
   machine = MachineClient()
-  machine.home()
+  machine.home() # Assume that at the beginning of the program go to home
+  machine.print_coords()
+  filename = 'rectangle.gcode'
+  print()
   i = 0
   correct_values = {
     "rapid": [False, True, True, True, True, False, False, False, False, False, False, True, True, True],
@@ -35,10 +38,7 @@ def test_correct_full_rectangle():
   assert machine._y == correct_values["y"][i]
   assert machine._z == correct_values["z"][i]
   i += 1
-  line_list = ['%', 'O0001', '(DIA 20.0 END MILL - NO CUTTER RADIUS COMP USED)', '(MACHINE OUTSIDE OF 100 X 200 RECTANGLE)', '(X0.0 Y0.0 - BOTTOM LEFT CORNER)',
-  'N1 G00 G17 G21 G40 G49 G80 G94', '(SET AND CHANGE TOOL 01)', 'N4 T01 M06', 'N5 S2000 M03', 'N6 G90 G54 G00 X-12.000 Y-12.000', '(CUTTING STARTS)',
-  'N9 G01 Z-5.000 F100.', '(LINEAR FEED TO XY WITH GIVEN FEED RATE)', 'N10 G01 X-12.000 Y-10.000 F600.', 'N11 G01 X110.000', 'N12 G01 Y210.000',
-  'N13 G01 X-10.000', 'N14 G01 Y-12.000', '(LIFT SPINDLE)', 'N15 G00 Z10.000 M09', '(STOP SPINDLE)', 'N16 G91 G28 Z0.0 M05', '(PROGRAM END)', 'N18 M30', '%']
+  line_list = cnc.read_file_to_list(filename)
   cnc.check_start_and_end(line_list)
   line_list = line_list[2:-1]
   line_list = cnc.remove_comments(line_list)
