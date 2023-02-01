@@ -68,18 +68,33 @@ def test_correct_expanded_rectangle():
   'N13 G01 X-10.000', 'N14 G01 Y-12.000', 'N15 X20.000 Y-5.000 Z-10.000', 'N16 Y-6.00 Z-11.000', 'N17 X19.000 Z-10.000', '(LIFT SPINDLE)', 'N18 G00 Z10.000 M09', 'N19 X5.000 Y25.000 Z5.000', 'N20 X0.000', 'N21 Y2.000', 'N22 Y5.000 Z2.000', 'N23 X3.000 Z1.000', 'N24 X-20.000 Y2.000', 'N25 Y-20.000 Z5.000', 'N26 X-25.000 Z2.000', 'N27 Y5.000 Z5.000', 'N28 X-5.000 Y2.000', 'N29  X-3.000 Y-5.000 F300. M08', 'N30 Y-3.000 Z-5.000', 'N31 X-4.000 Z-10.000', 'N32 Y-4.000 Z1.000', 'N33 X-3.000 Z6.000', 'N34 X-2.000 Z7.000', '(STOP SPINDLE)', 'N35 G91 G28 G20 G19 Z0.0 M05', '(PROGRAM END)', 'N37 G18 M30', '%']
   i = 0
   correct_values = {
-    "rapid": [False, True, True, True, True, False, False, False, False, False, False, False, False, False, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True],
-    "linear": [False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
-    "feed": [0.0, 0.0, 0.0, 0.0, 0.0, 100.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 300.0, 300.0, 300.0, 300.0, 300.0, 300.0, 300.0, 300.0],
-    "speed": [0, 0, 0, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 0, 0],
-    "coolant":  [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True, True, True, True, True, True, True, True],
-    "rot":      [False, False, False, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, False, False],
-    "tool": ["", "", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1"],
-    "mm": [None, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, False, False],
-    "plane": ["", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "YZ", "ZX"],
-    "x": [0.0, 0.0, 0.0, 0.0, -12.000, -12.000, -12.000, 110.000, 110.000, -10.000, -10.000, 20.000, 20.000, 19.000, 19.000, 5.000, 0.000, 0.000, 0.000, 3.000, -20.000, -20.000, -25.000, -25.000, -5.000, -3.000, -3.000, -4.000, -4.000, -3.000, -2.000, 0.000, 0.000],
-    "y": [0.0, 0.0, 0.0, 0.0, -12.000, -12.000, -10.000, -10.000, 210.000, 210.000, -12.000, -5.000, -6.000, -6.000, -6.000, 25.000, 25.000, 2.000, 5.000, 5.000, 2.000, -20.000, -20.000, 5.000, 2.000, -5.000, -3.000, -3.000, -4.000, -4.000, -4.000, 0.000, 0.000],
-    "z": [0.0, 0.0, 0.0, 0.0, 0.0, -5.000, -5.000, -5.000, -5.000, -5.000, -5.000, -10.000, -11.000, -10.000, 10.000, 5.000, 5.000, 5.000, 2.000, 1.000, 1.000, 5.000, 2.000, 5.000, 5.000, 5.000, -5.000, -10.000, 1.000, 6.000, 7.000, 0.000, 0.000]
+    "rapid": [False, True, True, True, True, False, False, False, False, False, False, False, False, False, True, True,
+              True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True],
+    "linear": [False, False, False, False, False, True, True, True, True, True, True, True, True, True, False, False,
+              False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+    "feed": [0.0, 0.0, 0.0, 0.0, 0.0, 100.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0,
+            600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 600.0, 300.0, 300.0, 300.0, 300.0, 300.0, 300.0, 300.0, 300.0],
+    "speed": [0, 0, 0, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000,
+              2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 0, 0],
+    "coolant":  [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False,
+                False, False, False, False, False, False, False, False, False, False, True, True, True, True, True, True, True, True],
+    "rot":      [False, False, False, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True,
+                True, True, True, True, True, True, True, True, True, True, True, True, False, False],
+    "tool": ["", "", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1",
+            "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1",
+            "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1", "Tool 1"],
+    "mm": [None, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True,
+          True, True, True, True, True, True, True, True, True, True, True, False, False],
+    "plane": ["", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY",
+              "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "XY", "YZ", "ZX"],
+    "x": [0.0, 0.0, 0.0, 0.0, -12.000, -12.000, -12.000, 110.000, 110.000, -10.000, -10.000, 20.000, 20.000, 19.000, 19.000,
+          5.000, 0.000, 0.000, 0.000, 3.000, -20.000, -20.000, -25.000, -25.000, -5.000, -3.000, -3.000, -4.000, -4.000, -3.000, -2.000,
+          0.000, 0.000],
+    "y": [0.0, 0.0, 0.0, 0.0, -12.000, -12.000, -10.000, -10.000, 210.000, 210.000, -12.000, -5.000, -6.000, -6.000, -6.000, 25.000,
+          25.000, 2.000, 5.000, 5.000, 2.000, -20.000, -20.000, 5.000, 2.000, -5.000, -3.000, -3.000, -4.000, -4.000, -4.000, 0.000,
+          0.000],
+    "z": [0.0, 0.0, 0.0, 0.0, 0.0, -5.000, -5.000, -5.000, -5.000, -5.000, -5.000, -10.000, -11.000, -10.000, 10.000, 5.000, 5.000,
+          5.000, 2.000, 1.000, 1.000, 5.000, 2.000, 5.000, 5.000, 5.000, -5.000, -10.000, 1.000, 6.000, 7.000, 0.000, 0.000]
     }
   assert machine._rapid_movement == correct_values["rapid"][i]
   assert machine._linear_movement == correct_values["linear"][i]
