@@ -4,6 +4,7 @@ import cnc
 import pytest
 
 def test_correct_full_rectangle():
+  """"Test execution of correctly loaded in rectangle.gcode file's array representation"""
   machine = MachineClient()
   machine.home()
   i = 0
@@ -221,3 +222,13 @@ def test_commenting_with_slashes():
   'N13 G01 X-10.000', 'N14 G01 Y-12.000', '(LIFT SPINDLE)', 'N15 G00 Z10.000 M09', '(STOP SPINDLE)', 'N16 G91 G28 Z0.0 M05', '(PROGRAM END)', 'N18 M30']
   with pytest.raises(SourceFileFormatError, match=r"Problem in the command line"):
     cnc.remove_comments(line_list)
+
+def test_no_movement_type():
+  """"Tests that if no movement type is specified at all before the move command, throws an error."""
+  machine = MachineClient()
+  line_list = ['N1 G17 G21 G40 G49 G80 G94', 'N4 T01 M06', 'N5 S2000 M03', 'N6 G90 G54 X-12.000 Y-12.000','N9 G01 Z-5.000 F100.',
+  'N10 G01 X-12.000 Y-10.000 Q600.', 'N11 G01 X110.000', 'N12 G01 Y210.000', 'N13 G01 X-10.000', 'N14 G01 Y-12.000', 'N15 G00 Z10.000 M09',
+  'N16 G91 G28 Z0.0 M05', 'N18 M30']
+  with pytest.raises(SourceFileFormatError, match=r"Movement type not defined"):
+    for line in line_list:
+      machine.execute_line(line)
