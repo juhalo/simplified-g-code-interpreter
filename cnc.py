@@ -103,7 +103,7 @@ class MachineClient:
           self.move(axis_one, self._y, current_axis_two-abs(axis_one_diff))
         move_func_name = "move_" + axis_two_name
         move_func = getattr(self, move_func_name)
-        move_func(axis_one)
+        move_func(axis_two)
       else:
         if axis_three_name == "z":
           self.move(axis_one, current_axis_two+abs(axis_one_diff), self._z)
@@ -113,7 +113,7 @@ class MachineClient:
           self.move(axis_one, self._y, current_axis_two+abs(axis_one_diff))
         move_func_name = "move_" + axis_two_name
         move_func = getattr(self, move_func_name)
-        move_func(axis_one)
+        move_func(axis_two)
     else:
       if axis_three_name == "z":
         self.move(axis_one, axis_two, self._z)
