@@ -232,3 +232,14 @@ def test_no_movement_type():
   with pytest.raises(SourceFileFormatError, match=r"Movement type not defined"):
     for line in line_list:
       machine.execute_line(line)
+
+def test_no_feed_rate():
+  """"Tests that if feed rate is zero and tries to move, throws an error."""
+  machine = MachineClient()
+  machine.home()
+  line_list = ['N1 G00 G17 G21 G40 G49 G80 G94', 'N4 T01 M06', 'N5 S2000 M03', 'N6 G90 G54 G00 X-12.000 Y-12.000','N9 G01 Z-5.000',
+  'N10 G01 X-12.000 Y-10.000 Q600.', 'N11 G01 X110.000', 'N12 G01 Y210.000', 'N13 G01 X-10.000', 'N14 G01 Y-12.000', 'N15 G00 Z10.000 M09',
+  'N16 G91 G28 Z0.0 M05', 'N18 M30']
+  with pytest.raises(SourceFileFormatError, match=r"Cannot execute movement due to feed rate being 0"):
+    for line in line_list:
+      machine.execute_line(line)
